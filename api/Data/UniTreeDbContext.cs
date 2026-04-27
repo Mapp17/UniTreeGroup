@@ -9,4 +9,6 @@ public class UniTreeDbContext : DbContext
     public DbSet<Wallet> Wallets { get; set; } = null!;
     public DbSet<Transactions> Transactions { get; set; } = null!;
     public DbSet<PayoutSchedule> PayoutSchedules { get; set; } = null!;
+
+    
 }
