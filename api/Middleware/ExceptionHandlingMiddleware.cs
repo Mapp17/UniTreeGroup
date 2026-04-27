@@ -65,11 +65,7 @@ public class ExceptionHandlingMiddleware
                 Message = br.Message
             }),
 
-            _ => (500, new
-            {
-                Code = 500,
-                Message = "An internal server error occurred"
-            })
+           
         };
     }
 }

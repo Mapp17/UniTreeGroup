@@ -4,6 +4,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<UserServices>();
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<PayoutServices>();
+builder.Services.AddScoped<PayoutRepository>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
