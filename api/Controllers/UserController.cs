@@ -12,6 +12,13 @@ namespace api.Controllers
             _userServices = userServices;
         }
 
+        [HttpPost("register")]
+        public IActionResult CreateUser(CreateDto newUser)
+        {
+            var createdUser = _userServices.CreateNewUser(newUser);
+            return Ok(createdUser);
+        }
+
         [HttpGet]
         public IActionResult GetUsers()
         {
@@ -19,12 +26,12 @@ namespace api.Controllers
             return Ok(users);
         }
 
-   /*     [HttpGet("{id}")]
+        [HttpGet("{id}/wallet")]
         public IActionResult GetUser(int id)
         {
-            var user = _context.Users.Find(id);
-            if (user == null) return NotFound();
-            return Ok(user.ToUserDto());
-        } */
+            var user = _userServices.GetUserWallet(id);
+            return Ok(user);
+        } 
+
     }
 }

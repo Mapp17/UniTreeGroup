@@ -10,5 +10,10 @@ public class UniTreeDbContext : DbContext
     public DbSet<Transactions> Transactions { get; set; } = null!;
     public DbSet<PayoutSchedule> PayoutSchedules { get; set; } = null!;
 
-    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<User>()
+            .Property(u => u.Id)
+            .UseIdentityColumn(); // Specifically tells Npgsql to use an auto-incrementing column
+    }
 }
