@@ -15,5 +15,9 @@ public class UniTreeDbContext : DbContext
         modelBuilder.Entity<User>()
             .Property(u => u.Id)
             .UseIdentityColumn(); // Specifically tells Npgsql to use an auto-incrementing column
+        
+        modelBuilder.Entity<Transactions>()
+            .Property(t => t.Id)
+            .UseIdentityColumn(); // Specifically tells Npgsql to use an auto-incrementing column
     }
 }

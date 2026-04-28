@@ -18,3 +18,25 @@ public class Transactions : BaseModel
     // Navigation
     public User User { get; set; } = null!;
 }
+
+
+/// <summary>
+/// Double-entry bookkeeping ledger line.
+/// Every financial event debits one account and credits another.
+/// The ledger must always balance (sum of debits == sum of credits).
+/// </summary>
+public class LedgerEntry : BaseModel
+{
+    public Guid TransactionId { get; set; }
+    public LedgerEntryType EntryType { get; set; } // Debit or Credit
+    public string AccountName { get; set; } = string.Empty; // e.g. "UserWallet", "StokvelPool", "ExternalGateway"
+    public Guid? WalletId { get; set; }
+    public Guid? StokvelGroupId { get; set; }
+    public decimal Amount { get; set; }
+    public string Description { get; set; } = string.Empty;
+ 
+    // Navigation
+    public Transactions Transactions { get; set; } = null!;
+    public Wallet? Wallet { get; set; }
+    
+}

@@ -6,6 +6,8 @@ builder.Services.AddScoped<UserServices>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<PayoutServices>();
 builder.Services.AddScoped<PayoutRepository>();
+builder.Services.AddScoped<TransactionsServices>();
+builder.Services.AddScoped<TransactionsRepository>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
