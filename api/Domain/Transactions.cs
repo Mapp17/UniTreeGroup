@@ -1,5 +1,4 @@
 
-
 /// <summary>
 /// Represents a high-level financial event (deposit, withdrawal, contribution, payout).
 /// Each Transaction produces two LedgerEntries (double-entry bookkeeping).
@@ -17,6 +16,7 @@ public class Transactions : BaseModel
 
     // Navigation
     public User User { get; set; } = null!;
+    public ICollection<LedgerEntry> LedgerEntries { get; set; } = new List<LedgerEntry>();
 }
 
 
@@ -27,16 +27,16 @@ public class Transactions : BaseModel
 /// </summary>
 public class LedgerEntry : BaseModel
 {
-    public Guid TransactionId { get; set; }
+    public int TransactionsId { get; set; } // Changed from Guid to int to match Transactions.Id
     public LedgerEntryType EntryType { get; set; } // Debit or Credit
     public string AccountName { get; set; } = string.Empty; // e.g. "UserWallet", "StokvelPool", "ExternalGateway"
-    public Guid? WalletId { get; set; }
-    public Guid? StokvelGroupId { get; set; }
+    public int? WalletId { get; set; }
+    public int? StokvelGroupId { get; set; }
     public decimal Amount { get; set; }
     public string Description { get; set; } = string.Empty;
  
     // Navigation
     public Transactions Transactions { get; set; } = null!;
     public Wallet? Wallet { get; set; }
-    
+    public UniTreeGroup? StokvelGroup { get; set; }
 }

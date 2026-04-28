@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace api.Migrations
 {
     [DbContext(typeof(UniTreeDbContext))]
-    [Migration("20260426201616_InitialMigrations")]
-    partial class InitialMigrations
+    [Migration("20260428210202_FullMigrationAfterFixingErrors")]
+    partial class FullMigrationAfterFixingErrors
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,67 @@ namespace api.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("LedgerEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AccountName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("EntryType")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<int>("StokvelGroupId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TransactionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("TransactionsId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("WalletId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StokvelGroupId");
+
+                    b.HasIndex("TransactionsId");
+
+                    b.HasIndex("WalletId");
+
+                    b.ToTable("LedgerEntry");
+                });
 
             modelBuilder.Entity("Membership", b =>
                 {
@@ -60,15 +121,25 @@ namespace api.Migrations
                     b.Property<decimal>("TotalContributed")
                         .HasColumnType("numeric");
 
+                    b.Property<int>("UniTreeGroupId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("UserId1")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
+                    b.HasIndex("UniTreeGroupId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1")
                         .IsUnique();
 
                     b.ToTable("Memberships");
@@ -116,6 +187,9 @@ namespace api.Migrations
                     b.Property<int?>("TransactionId1")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("UniTreeGroupId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -124,6 +198,8 @@ namespace api.Migrations
                     b.HasIndex("BeneficiaryUserId");
 
                     b.HasIndex("TransactionId1");
+
+                    b.HasIndex("UniTreeGroupId");
 
                     b.ToTable("PayoutSchedules");
                 });
@@ -188,6 +264,63 @@ namespace api.Migrations
                     b.HasIndex("WalletId");
 
                     b.ToTable("Transactions");
+                });
+
+            modelBuilder.Entity("UniTreeGroup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("ContributionAmount")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("MaxMembers")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("PayoutCycle")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("PoolBalance")
+                        .HasColumnType("numeric");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.ToTable("UniTreeGroups");
                 });
 
             modelBuilder.Entity("User", b =>
@@ -277,13 +410,50 @@ namespace api.Migrations
                     b.ToTable("Wallets");
                 });
 
-            modelBuilder.Entity("Membership", b =>
+            modelBuilder.Entity("LedgerEntry", b =>
                 {
-                    b.HasOne("User", "User")
-                        .WithOne("Memberships")
-                        .HasForeignKey("Membership", "UserId")
+                    b.HasOne("UniTreeGroup", "StokvelGroup")
+                        .WithMany("LedgerEntries")
+                        .HasForeignKey("StokvelGroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Transactions", "Transactions")
+                        .WithMany()
+                        .HasForeignKey("TransactionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Wallet", "Wallet")
+                        .WithMany()
+                        .HasForeignKey("WalletId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StokvelGroup");
+
+                    b.Navigation("Transactions");
+
+                    b.Navigation("Wallet");
+                });
+
+            modelBuilder.Entity("Membership", b =>
+                {
+                    b.HasOne("UniTreeGroup", null)
+                        .WithMany("Memberships")
+                        .HasForeignKey("UniTreeGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("User", null)
+                        .WithOne("Memberships")
+                        .HasForeignKey("Membership", "UserId1");
 
                     b.Navigation("User");
                 });
@@ -299,6 +469,10 @@ namespace api.Migrations
                     b.HasOne("Transactions", "Transaction")
                         .WithMany()
                         .HasForeignKey("TransactionId1");
+
+                    b.HasOne("UniTreeGroup", null)
+                        .WithMany("PayoutSchedules")
+                        .HasForeignKey("UniTreeGroupId");
 
                     b.Navigation("BeneficiaryUser");
 
@@ -320,6 +494,17 @@ namespace api.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("UniTreeGroup", b =>
+                {
+                    b.HasOne("User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+                });
+
             modelBuilder.Entity("Wallet", b =>
                 {
                     b.HasOne("User", "User")
@@ -329,6 +514,15 @@ namespace api.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UniTreeGroup", b =>
+                {
+                    b.Navigation("LedgerEntries");
+
+                    b.Navigation("Memberships");
+
+                    b.Navigation("PayoutSchedules");
                 });
 
             modelBuilder.Entity("User", b =>

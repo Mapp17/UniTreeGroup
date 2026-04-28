@@ -26,7 +26,6 @@ public class ExceptionHandlingMiddleware
 
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-
         context.Response.ContentType = "application/json";
 
         var (statusCode, errorResponse) = CreateErrorResponse(exception);
@@ -64,8 +63,14 @@ public class ExceptionHandlingMiddleware
                 Code = 400,
                 Message = br.Message
             }),
+            _ => (500, new
+            {
+                Code = 500,
+                Message = "An unexpected error occurred.",
+                // NEW: Grab the InnerException message if it exists
+                Details = exception.InnerException?.Message ?? exception.Message 
+            })
 
-           
         };
     }
 }

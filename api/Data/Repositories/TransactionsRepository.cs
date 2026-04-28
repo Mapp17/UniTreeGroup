@@ -9,20 +9,30 @@ public class TransactionsRepository
         _context = context;
     }
 
-    public Transactions Create(Transactions transaction)
-{
-    try 
+    public Transactions CreateWithLedger(Transactions transaction, List<LedgerEntry> entries)
     {
-        _context.Transactions.Add(transaction);
-        _context.SaveChanges();
-        return transaction;
+        using var dbTransaction = _context.Database.BeginTransaction();
+        try 
+        {
+            _context.Transactions.Add(transaction);
+            _context.SaveChanges(); // Get Transaction ID
+
+            foreach (var entry in entries)
+            {
+                // Ensure TransactionId is linked (assuming domain logic uses Id not Guid for simplicity now)
+                _context.Set<LedgerEntry>().Add(entry);
+            }
+
+            _context.SaveChanges();
+            dbTransaction.Commit();
+            return transaction;
+        }
+        catch (Exception)
+        {
+            dbTransaction.Rollback();
+            throw new ConflictException("Could not save transaction. A database or ledger conflict occurred.");
+        }
     }
-    catch (Microsoft.EntityFrameworkCore.DbUpdateException)
-    {
-        // We turn a messy DB error into a clean "Conflict" error
-        throw new ConflictException("Could not save transaction. The reference or ID might already exist.");
-    }
-}
 
     public Transactions? GetByReference(string reference)
     {

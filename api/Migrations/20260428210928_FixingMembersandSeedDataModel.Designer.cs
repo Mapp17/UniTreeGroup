@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace api.Migrations
 {
     [DbContext(typeof(UniTreeDbContext))]
-    partial class UniTreeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260428210928_FixingMembersandSeedDataModel")]
+    partial class FixingMembersandSeedDataModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -121,6 +124,9 @@ namespace api.Migrations
                     b.Property<int>("UniTreeGroupId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("UniTreeGroupId1")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -133,6 +139,8 @@ namespace api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("UniTreeGroupId");
+
+                    b.HasIndex("UniTreeGroupId1");
 
                     b.HasIndex("UserId");
 
@@ -436,9 +444,15 @@ namespace api.Migrations
 
             modelBuilder.Entity("Membership", b =>
                 {
-                    b.HasOne("UniTreeGroup", "UniTreeGroup")
+                    b.HasOne("UniTreeGroup", null)
                         .WithMany("Memberships")
                         .HasForeignKey("UniTreeGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("UniTreeGroup", "UniTreeGroup")
+                        .WithMany()
+                        .HasForeignKey("UniTreeGroupId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

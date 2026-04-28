@@ -2,12 +2,17 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+// Register Services and Repositories
 builder.Services.AddScoped<UserServices>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<PayoutServices>();
 builder.Services.AddScoped<PayoutRepository>();
 builder.Services.AddScoped<TransactionsServices>();
 builder.Services.AddScoped<TransactionsRepository>();
+builder.Services.AddScoped<UniTreeGroupServices>();
+builder.Services.AddScoped<UniTreeGroupRepository>();
+ 
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -25,6 +30,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 
 app.UseHttpsRedirection();
 app.UseMiddleware<ExceptionHandlingMiddleware>();

@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigrations : Migration
+    public partial class FullMigrationAfterFixingErrors : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -34,17 +34,19 @@ namespace api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Memberships",
+                name: "UniTreeGroups",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    CreatedById = table.Column<int>(type: "integer", nullable: false),
+                    ContributionAmount = table.Column<decimal>(type: "numeric", nullable: false),
+                    PayoutCycle = table.Column<int>(type: "integer", nullable: false),
+                    MaxMembers = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
-                    JoinedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    PayoutOrder = table.Column<int>(type: "integer", nullable: false),
-                    TotalContributed = table.Column<decimal>(type: "numeric", nullable: false),
-                    HasReceivedPayout = table.Column<bool>(type: "boolean", nullable: false),
+                    PoolBalance = table.Column<decimal>(type: "numeric", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
@@ -53,13 +55,13 @@ namespace api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Memberships", x => x.Id);
+                    table.PrimaryKey("PK_UniTreeGroups", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Memberships_Users_UserId",
-                        column: x => x.UserId,
+                        name: "FK_UniTreeGroups_Users_CreatedById",
+                        column: x => x.CreatedById,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -86,6 +88,48 @@ namespace api.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Memberships",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    UniTreeGroupId = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    JoinedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    PayoutOrder = table.Column<int>(type: "integer", nullable: false),
+                    TotalContributed = table.Column<decimal>(type: "numeric", nullable: false),
+                    HasReceivedPayout = table.Column<bool>(type: "boolean", nullable: false),
+                    UserId1 = table.Column<int>(type: "integer", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "bytea", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Memberships", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Memberships_UniTreeGroups_UniTreeGroupId",
+                        column: x => x.UniTreeGroupId,
+                        principalTable: "UniTreeGroups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Memberships_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Memberships_Users_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -126,6 +170,49 @@ namespace api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "LedgerEntry",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TransactionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EntryType = table.Column<int>(type: "integer", nullable: false),
+                    AccountName = table.Column<string>(type: "text", nullable: false),
+                    WalletId = table.Column<int>(type: "integer", nullable: false),
+                    StokvelGroupId = table.Column<int>(type: "integer", nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    TransactionsId = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "bytea", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LedgerEntry", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LedgerEntry_Transactions_TransactionsId",
+                        column: x => x.TransactionsId,
+                        principalTable: "Transactions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LedgerEntry_UniTreeGroups_StokvelGroupId",
+                        column: x => x.StokvelGroupId,
+                        principalTable: "UniTreeGroups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LedgerEntry_Wallets_WalletId",
+                        column: x => x.WalletId,
+                        principalTable: "Wallets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PayoutSchedules",
                 columns: table => new
                 {
@@ -138,6 +225,7 @@ namespace api.Migrations
                     Status = table.Column<int>(type: "integer", nullable: false),
                     TransactionId = table.Column<Guid>(type: "uuid", nullable: true),
                     TransactionId1 = table.Column<int>(type: "integer", nullable: true),
+                    UniTreeGroupId = table.Column<int>(type: "integer", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
@@ -153,6 +241,11 @@ namespace api.Migrations
                         principalTable: "Transactions",
                         principalColumn: "Id");
                     table.ForeignKey(
+                        name: "FK_PayoutSchedules_UniTreeGroups_UniTreeGroupId",
+                        column: x => x.UniTreeGroupId,
+                        principalTable: "UniTreeGroups",
+                        principalColumn: "Id");
+                    table.ForeignKey(
                         name: "FK_PayoutSchedules_Users_BeneficiaryUserId",
                         column: x => x.BeneficiaryUserId,
                         principalTable: "Users",
@@ -161,9 +254,34 @@ namespace api.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_LedgerEntry_StokvelGroupId",
+                table: "LedgerEntry",
+                column: "StokvelGroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LedgerEntry_TransactionsId",
+                table: "LedgerEntry",
+                column: "TransactionsId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LedgerEntry_WalletId",
+                table: "LedgerEntry",
+                column: "WalletId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Memberships_UniTreeGroupId",
+                table: "Memberships",
+                column: "UniTreeGroupId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Memberships_UserId",
                 table: "Memberships",
-                column: "UserId",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Memberships_UserId1",
+                table: "Memberships",
+                column: "UserId1",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -177,6 +295,11 @@ namespace api.Migrations
                 column: "TransactionId1");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PayoutSchedules_UniTreeGroupId",
+                table: "PayoutSchedules",
+                column: "UniTreeGroupId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Transactions_UserId",
                 table: "Transactions",
                 column: "UserId");
@@ -185,6 +308,11 @@ namespace api.Migrations
                 name: "IX_Transactions_WalletId",
                 table: "Transactions",
                 column: "WalletId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UniTreeGroups_CreatedById",
+                table: "UniTreeGroups",
+                column: "CreatedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Wallets_UserId",
@@ -197,6 +325,9 @@ namespace api.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "LedgerEntry");
+
+            migrationBuilder.DropTable(
                 name: "Memberships");
 
             migrationBuilder.DropTable(
@@ -204,6 +335,9 @@ namespace api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Transactions");
+
+            migrationBuilder.DropTable(
+                name: "UniTreeGroups");
 
             migrationBuilder.DropTable(
                 name: "Wallets");

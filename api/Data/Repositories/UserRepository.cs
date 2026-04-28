@@ -8,10 +8,9 @@ public class UserRepository
         _context = context;
     }
 
-    // New helper for existence checks
     public User? GetUserByEmail(string email)
     {
-        return _context.Users.FirstOrDefault(u => u.Email == email);
+        return _context.Users.FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
     }
 
     public IEnumerable<User> GetAllUsers()
@@ -27,16 +26,17 @@ public class UserRepository
 
     public User CreateUser(User user)
     {
-        try 
+        try
         {
             _context.Users.Add(user);
             _context.SaveChanges();
             return user;
         }
-        catch (DbUpdateException)
+        catch (Microsoft.EntityFrameworkCore.DbUpdateException ex)
         {
-            // Fallback for database-level unique constraint violations
-            throw new BadRequestException("An error occurred while saving to the database. Ensure data is unique.");
+            // Pass the actual Postgres error to your BadRequest handler
+            var realError = ex.InnerException?.Message ?? ex.Message;
+            throw new BadRequestException($"Database save failed: {realError}");
         }
-    }  
+    }
 }
