@@ -13,9 +13,9 @@ namespace api.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult CreateUser(CreateDto newUser)
+        public async Task<IActionResult> CreateUser(CreateDto newUser)
         {
-            var createdUser = _userServices.CreateNewUser(newUser);
+            var createdUser = await _userServices.CreateNewUser(newUser);
             return Ok(createdUser);
         }
 
@@ -32,6 +32,5 @@ namespace api.Controllers
             var user = _userServices.GetUserWallet(id);
             return Ok(user);
         } 
-
     }
 }

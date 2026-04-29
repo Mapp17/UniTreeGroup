@@ -16,9 +16,10 @@ namespace api.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "8.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pgcrypto");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("LedgerEntry", b =>
@@ -52,15 +53,18 @@ namespace api.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<byte[]>("RowVersion")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bytea")
+                        .HasDefaultValueSql("gen_random_bytes(8)");
 
-                    b.Property<int>("StokvelGroupId")
+                    b.Property<int?>("StokvelGroupId")
                         .HasColumnType("integer");
-
-                    b.Property<Guid>("TransactionId")
-                        .HasColumnType("uuid");
 
                     b.Property<int>("TransactionsId")
                         .HasColumnType("integer");
@@ -68,7 +72,7 @@ namespace api.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("WalletId")
+                    b.Property<int?>("WalletId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -79,7 +83,7 @@ namespace api.Migrations
 
                     b.HasIndex("WalletId");
 
-                    b.ToTable("LedgerEntry");
+                    b.ToTable("LedgerEntries");
                 });
 
             modelBuilder.Entity("Membership", b =>
@@ -110,7 +114,9 @@ namespace api.Migrations
 
                     b.Property<byte[]>("RowVersion")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bytea")
+                        .HasDefaultValueSql("gen_random_bytes(8)");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -170,7 +176,9 @@ namespace api.Migrations
 
                     b.Property<byte[]>("RowVersion")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bytea")
+                        .HasDefaultValueSql("gen_random_bytes(8)");
 
                     b.Property<DateTime>("ScheduledDate")
                         .HasColumnType("timestamp with time zone");
@@ -237,7 +245,9 @@ namespace api.Migrations
 
                     b.Property<byte[]>("RowVersion")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bytea")
+                        .HasDefaultValueSql("gen_random_bytes(8)");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -301,11 +311,14 @@ namespace api.Migrations
                         .HasColumnType("integer");
 
                     b.Property<decimal>("PoolBalance")
+                        .IsConcurrencyToken()
                         .HasColumnType("numeric");
 
                     b.Property<byte[]>("RowVersion")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bytea")
+                        .HasDefaultValueSql("gen_random_bytes(8)");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -355,7 +368,9 @@ namespace api.Migrations
 
                     b.Property<byte[]>("RowVersion")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bytea")
+                        .HasDefaultValueSql("gen_random_bytes(8)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -390,8 +405,11 @@ namespace api.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea")
+                        .HasDefaultValueSql("gen_random_bytes(8)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -411,21 +429,17 @@ namespace api.Migrations
                 {
                     b.HasOne("UniTreeGroup", "StokvelGroup")
                         .WithMany("LedgerEntries")
-                        .HasForeignKey("StokvelGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("StokvelGroupId");
 
                     b.HasOne("Transactions", "Transactions")
-                        .WithMany()
+                        .WithMany("LedgerEntries")
                         .HasForeignKey("TransactionsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Wallet", "Wallet")
                         .WithMany()
-                        .HasForeignKey("WalletId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("WalletId");
 
                     b.Navigation("StokvelGroup");
 
@@ -513,6 +527,11 @@ namespace api.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Transactions", b =>
+                {
+                    b.Navigation("LedgerEntries");
                 });
 
             modelBuilder.Entity("UniTreeGroup", b =>

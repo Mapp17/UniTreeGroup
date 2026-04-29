@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+
 namespace api.Controllers
 {
     [Route("api/unitree-groups")]
@@ -13,16 +14,16 @@ namespace api.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] CreateGroupDto dto)
-            => Ok(_service.CreateGroup(dto));
+        public async Task<IActionResult> Create([FromBody] CreateGroupDto dto)
+            => Ok(await _service.CreateGroup(dto));
 
         [HttpGet]
-        public IActionResult List()
-            => Ok(_service.GetAllGroups());
+        public async Task<IActionResult> List()
+            => Ok(await _service.GetAllGroups());
 
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
-            => Ok(_service.GetGroupById(id));
+        public async Task<IActionResult> Get(int id)
+            => Ok(await _service.GetGroupById(id));
 
         [HttpPost("{id}/join")]
         public async Task<IActionResult> Join(int id, [FromBody] int userId)
@@ -32,7 +33,7 @@ namespace api.Controllers
         }
 
         [HttpGet("{id}/members")]
-        public IActionResult GetMembers(int id)
-            => Ok(_service.GetMembers(id));
+        public async Task<IActionResult> GetMembers(int id)
+            =>  Ok(await _service.GetMembers(id));
     }
 }

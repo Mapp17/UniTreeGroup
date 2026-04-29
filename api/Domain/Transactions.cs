@@ -32,6 +32,7 @@ public class LedgerEntry : BaseModel
     public string AccountName { get; set; } = string.Empty; // e.g. "UserWallet", "StokvelPool", "ExternalGateway"
     public int? WalletId { get; set; }
     public int? StokvelGroupId { get; set; }
+    public string Reference { get; set; } = default!;
     public decimal Amount { get; set; }
     public string Description { get; set; } = string.Empty;
  

@@ -14,16 +14,16 @@ namespace api.Controllers
         }
 
         [HttpPost("deposit")]
-        public IActionResult Deposit([FromBody] TransactionRequestDto dto)
-            => Ok(_service.ProcessDeposit(dto));
+        public async Task<IActionResult> Deposit([FromBody] TransactionRequestDto dto)
+            => Ok(await _service.ProcessDeposit(dto));
 
         [HttpPost("withdraw")]
-        public IActionResult Withdraw([FromBody] TransactionRequestDto dto)
-            => Ok(_service.ProcessWithdraw(dto));
+        public async Task<IActionResult> Withdraw([FromBody] TransactionRequestDto dto)
+            => Ok(await _service.ProcessWithdraw(dto));
 
         [HttpPost("contribute")]
-        public IActionResult Contribute([FromBody] TransactionRequestDto dto)
-            => Ok(_service.ProcessContribute(dto));
+        public async Task<IActionResult> Contribute([FromBody] TransactionRequestDto dto)
+            => Ok(await _service.ProcessContribute(dto));
 
         [HttpGet("user/{id}")]
         public IActionResult GetUserTransactions(int id)

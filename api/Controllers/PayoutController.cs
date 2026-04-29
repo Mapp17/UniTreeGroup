@@ -14,16 +14,16 @@ namespace api.Controllers
         }
 
         [HttpPost("schedule")]
-        public IActionResult Schedule([FromBody] CreatePayoutDto dto)
+        public async Task<IActionResult> Schedule([FromBody] CreatePayoutDto dto)
         {
-            var result = _payoutServices.SchedulePayout(dto);
+            var result = await _payoutServices.SchedulePayoutAsync(dto);
             return Ok(result);
         }
 
         [HttpGet("group/{id}")]
-        public IActionResult GetGroup(int id)
+        public async Task<IActionResult> GetGroup(int id)
         {
-            var results = _payoutServices.GetPayoutGroup(id);
+            var results = await _payoutServices.GetPayoutGroupAsync(id);
             return Ok(results);
         }
     }

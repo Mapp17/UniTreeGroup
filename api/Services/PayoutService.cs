@@ -1,15 +1,13 @@
 public class PayoutServices
 {
-    private readonly PayoutRepository _payoutRepository;
-    private readonly UserRepository _userRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public PayoutServices(PayoutRepository payoutRepository, UserRepository userRepository)
+    public PayoutServices(IUnitOfWork unitOfWork)
     {
-        _payoutRepository = payoutRepository;
-        _userRepository = userRepository;
+        _unitOfWork = unitOfWork;
     }
 
-    public PayoutReadDto SchedulePayout(CreatePayoutDto dto)
+    public async Task<PayoutReadDto> SchedulePayoutAsync(CreatePayoutDto dto)
     {
         // GUARD: Ensure Amount is positive
         if (dto.Amount <= 0)
@@ -20,7 +18,7 @@ public class PayoutServices
             throw new BadRequestException("Scheduled date cannot be in the past.");
 
         // GUARD: Ensure Beneficiary exists
-        var user = _userRepository.GetUserById(dto.BeneficiaryUserId);
+        var user = _unitOfWork.Users.GetByIdWithWallet(dto.BeneficiaryUserId);
         if (user == null)
             throw new NotFoundException($"Beneficiary user with ID {dto.BeneficiaryUserId} does not exist.");
 
@@ -32,17 +30,18 @@ public class PayoutServices
             Status = PayoutScheduleStatus.Scheduled
         };
 
-        var created = _payoutRepository.Create(payout);
+        await _unitOfWork.Payouts.AddAsync(payout);
+        await _unitOfWork.CompleteAsync();
 
-        return MapToDto(created);
+        return MapToDto(payout);
     }
 
-    public IEnumerable<PayoutReadDto> GetPayoutGroup(int beneficiaryId)
+    public async Task<IEnumerable<PayoutReadDto>> GetPayoutGroupAsync(int beneficiaryId)
     {
-        var payouts = _payoutRepository.GetByBeneficiaryId(beneficiaryId);
+        var payouts = _unitOfWork.Payouts.GetByBeneficiaryId(beneficiaryId);
         
         // GUARD: Return empty list or throw if the "group" (user) doesn't exist
-        if (!payouts.Any() && _userRepository.GetUserById(beneficiaryId) == null)
+        if (!payouts.Any() && _unitOfWork.Users.GetByIdWithWallet(beneficiaryId) == null)
             throw new NotFoundException("No payouts found for the specified user group.");
 
         return payouts.Select(MapToDto);

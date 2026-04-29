@@ -1,60 +1,34 @@
 using Microsoft.EntityFrameworkCore;
 
-public class UniTreeGroupRepository
+public interface IUniTreeGroupRepository : IGenericRepository<UniTreeGroup>
 {
-    private readonly UniTreeDbContext _context;
+    Task<IEnumerable<UniTreeGroup>> GetAllWithDetailsAsync();
+    Task<UniTreeGroup?> GetByIdWithDetailsAsync(int id);
+    Task<bool> IsUserInAnyGroupAsync(int userId);
+    Task<bool> AddMemberAsync(Membership membership);
+}
 
-    public UniTreeGroupRepository(UniTreeDbContext context)
-    {
-        _context = context;
-    }
+public class UniTreeGroupRepository : GenericRepository<UniTreeGroup>, IUniTreeGroupRepository
+{
+    public UniTreeGroupRepository(UniTreeDbContext context) : base(context) { }
 
-    public UniTreeGroup Create(UniTreeGroup group)
-    {
-        try
-        {
-            _context.UniTreeGroups.Add(group);
-            _context.SaveChanges();
-            return group;
-        }
-        catch (Microsoft.EntityFrameworkCore.DbUpdateException dbEx)
-        {
-            throw new ConflictException("Could not create group. A database constraint was violated.", dbEx.InnerException?.Message);
-        }
-    }
-
-    public IEnumerable<UniTreeGroup> GetAll()
-    {
-        return _context.UniTreeGroups
-            .Include(g => g.CreatedBy)
-            .Include(g => g.Memberships)
-            .ToList();
-    }
-
-    public UniTreeGroup? GetById(int id)
-    {
-        return _context.UniTreeGroups
-            .Include(g => g.CreatedBy)
-            .Include(g => g.Memberships)
-                .ThenInclude(m => m.User)
-            .FirstOrDefault(g => g.Id == id);
-    }
-
-    public void AddMember(Membership membership)
-    {
-        _context.Memberships.Add(membership);
-        _context.SaveChanges();
-    }
-
-    public async Task<UniTreeGroup?> GetByIdAsync(int id)
+    public async Task<IEnumerable<UniTreeGroup>> GetAllWithDetailsAsync()
     {
         return await _context.UniTreeGroups
             .Include(g => g.CreatedBy)
             .Include(g => g.Memberships)
+            .ToListAsync();
+    }
+
+    public async Task<UniTreeGroup?> GetByIdWithDetailsAsync(int id)
+    {
+        return await _context.UniTreeGroups
+            .Include(g => g.CreatedBy)
+            .Include(g => g.Memberships)
+                .ThenInclude(m => m.User)
             .FirstOrDefaultAsync(g => g.Id == id);
     }
 
-    // UPDATED: Check if user is in ANY group to prevent the 409 DB error
     public async Task<bool> IsUserInAnyGroupAsync(int userId)
     {
         return await _context.Memberships
@@ -66,7 +40,7 @@ public class UniTreeGroupRepository
         try 
         {
             await _context.Memberships.AddAsync(membership);
-            return await _context.SaveChangesAsync() > 0;
+            return true; // UnitOfWork.CompleteAsync will handle the SaveChanges
         }
         catch (Microsoft.EntityFrameworkCore.DbUpdateException dbEx)
         {

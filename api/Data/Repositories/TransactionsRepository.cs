@@ -1,35 +1,43 @@
 using Microsoft.EntityFrameworkCore;
 
-public class TransactionsRepository
+public interface ITransactionsRepository : IGenericRepository<Transactions>
 {
-    private readonly UniTreeDbContext _context;
+    Task<Transactions> CreateWithLedgerAsync(Transactions transaction, List<LedgerEntry> entries);
+    Transactions? GetByReference(string reference);
+    IEnumerable<Transactions> GetByUserId(int userId);
+    Transactions? GetByIdWithUser(int id);
+}
 
-    public TransactionsRepository(UniTreeDbContext context)
-    {
-        _context = context;
-    }
+public class TransactionsRepository : GenericRepository<Transactions>, ITransactionsRepository
+{
+    public TransactionsRepository(UniTreeDbContext context) : base(context) { }
 
-    public Transactions CreateWithLedger(Transactions transaction, List<LedgerEntry> entries)
+    public async Task<Transactions> CreateWithLedgerAsync(Transactions transaction, List<LedgerEntry> entries)
     {
-        using var dbTransaction = _context.Database.BeginTransaction();
+        using var dbTransaction = await _context.Database.BeginTransactionAsync();
         try 
         {
             _context.Transactions.Add(transaction);
-            _context.SaveChanges(); // Get Transaction ID
+            await _context.SaveChangesAsync(); 
 
             foreach (var entry in entries)
             {
-                // Ensure TransactionId is linked (assuming domain logic uses Id not Guid for simplicity now)
+                entry.TransactionsId = transaction.Id; // Ensure FK is set
                 _context.Set<LedgerEntry>().Add(entry);
             }
 
-            _context.SaveChanges();
-            dbTransaction.Commit();
+            await _context.SaveChangesAsync();
+            await dbTransaction.CommitAsync();
             return transaction;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            await dbTransaction.RollbackAsync();
+            throw new InvalidOperationException("Wallet or group was modified by another transaction. Try again.");
         }
         catch (Exception)
         {
-            dbTransaction.Rollback();
+            await dbTransaction.RollbackAsync();
             throw new ConflictException("Could not save transaction. A database or ledger conflict occurred.");
         }
     }
@@ -47,7 +55,7 @@ public class TransactionsRepository
             .ToList();
     }
 
-    public Transactions? GetById(int id)
+    public Transactions? GetByIdWithUser(int id)
     {
         return _context.Transactions.Include(t => t.User).FirstOrDefault(t => t.Id == id);
     }

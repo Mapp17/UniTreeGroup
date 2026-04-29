@@ -1,14 +1,14 @@
 public class UserServices
 {
-    private readonly UserRepository _userRepository;
-    public UserServices(UserRepository userRepository)
+    private readonly IUnitOfWork _unitOfWork;
+    public UserServices(IUnitOfWork unitOfWork)
     {
-        _userRepository = userRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public IEnumerable<UserDto> GetAllUsers()
     {
-        var users = _userRepository.GetAllUsers();
+        var users = _unitOfWork.Users.Find(_ => true); // Using Find as a proxy for GetAll if GetAll isn't async here or just to show pattern
         return users.Select(user => new UserDto
         {
             FullName = user.FullName,
@@ -19,7 +19,7 @@ public class UserServices
     
     public UserWalletDto GetUserWallet(int id)
     {
-        var user = _userRepository.GetUserById(id);
+        var user = _unitOfWork.Users.GetByIdWithWallet(id);
 
         // GUARD CLAUSE: Check if user exists
         if (user == null)
@@ -30,7 +30,13 @@ public class UserServices
         // GUARD CLAUSE: Check if wallet is initialized
         if (user.Wallet == null)
         {
-            throw new BadRequestException("User does not have an active wallet.");
+            return new UserWalletDto
+            {
+                UserId = user.Id,
+                FullNames = user.FullName,
+                Balance = 0m, // Default balance for uninitialized wallet
+                Currency = "ZAR" // Default currency
+            };
         }
 
         return new UserWalletDto
@@ -42,7 +48,10 @@ public class UserServices
         };
     }
 
-    public User CreateNewUser(CreateDto newUserdto)
+    
+    
+
+    public async Task<User> CreateNewUser(CreateDto newUserdto)
     {
         // GUARD CLAUSE: Basic Validation
         if (string.IsNullOrWhiteSpace(newUserdto.Email))
@@ -54,19 +63,27 @@ public class UserServices
         }
 
         // GUARD CLAUSE: Check for existing email
-        var existingUser = _userRepository.GetUserByEmail(newUserdto.Email);
+        var existingUser = _unitOfWork.Users.GetByEmail(newUserdto.Email);
         if (existingUser != null)
         {
             throw new ConflictException("A user with this email already exists.", new { Email = newUserdto.Email });
         }
 
+        // Create user with an initialized wallet
         User newuser = new User
         {
             FullName = newUserdto.FullName,
             Email = newUserdto.Email,
-            PhoneNumber = newUserdto.PhoneNumber
+            PhoneNumber = newUserdto.PhoneNumber,
+            Wallet = new Wallet
+            {
+                Balance = 0m,
+                Currency = "ZAR"
+            }
         };
 
-        return _userRepository.CreateUser(newuser);
+        await _unitOfWork.Users.AddAsync(newuser);
+        await _unitOfWork.CompleteAsync();
+        return newuser;
     }
 }

@@ -1,20 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 
-public class PayoutRepository
+public interface IPayoutRepository : IGenericRepository<PayoutSchedule>
 {
-    private readonly UniTreeDbContext _context;
+    IEnumerable<PayoutSchedule> GetByBeneficiaryId(int userId);
+}
 
-    public PayoutRepository(UniTreeDbContext context)
-    {
-        _context = context;
-    }
-
-    public PayoutSchedule Create(PayoutSchedule payout)
-    {
-        _context.PayoutSchedules.Add(payout);
-        _context.SaveChanges();
-        return payout;
-    }
+public class PayoutRepository : GenericRepository<PayoutSchedule>, IPayoutRepository
+{
+    public PayoutRepository(UniTreeDbContext context) : base(context) { }
 
     public IEnumerable<PayoutSchedule> GetByBeneficiaryId(int userId)
     {
