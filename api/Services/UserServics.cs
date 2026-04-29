@@ -66,7 +66,8 @@ public class UserServices
         var existingUser = _unitOfWork.Users.GetByEmail(newUserdto.Email);
         if (existingUser != null)
         {
-            throw new ConflictException("A user with this email already exists.", new { Email = newUserdto.Email });
+            throw new ConflictException("A user with this email already exists.",
+             new { Email = newUserdto.Email });
         }
 
         // Create user with an initialized wallet

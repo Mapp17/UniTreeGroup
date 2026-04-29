@@ -11,5 +11,5 @@ public class Membership : BaseModel
 
     // Navigation
     public User User { get; set; } = null!;
-    public UniTreeGroup UniTreeGroup { get; set; } = null!; // Added this
+    public UniTreeGroup UniTreeGroup { get; set; } = null!; 
 }

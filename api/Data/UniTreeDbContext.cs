@@ -15,7 +15,7 @@ public class UniTreeDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // 🛠️ 1. ENABLE POSTGRES EXTENSIONS
+        // 1. ENABLE POSTGRES EXTENSIONS
         // This allows Postgres to use the 'gen_random_bytes' function
         modelBuilder.HasPostgresExtension("pgcrypto");
 
@@ -25,7 +25,7 @@ public class UniTreeDbContext : DbContext
         modelBuilder.Entity<UniTreeGroup>().Property(g => g.Id).UseIdentityColumn();
         modelBuilder.Entity<LedgerEntry>().Property(l => l.Id).UseIdentityColumn();
 
-        // 🛠️ 2. CONCURRENCY TOKENS
+        // 2. CONCURRENCY TOKENS
         modelBuilder.Entity<Wallet>()
             .Property(w => w.RowVersion)
             .IsRowVersion()
@@ -35,7 +35,7 @@ public class UniTreeDbContext : DbContext
             .Property(g => g.PoolBalance)
             .IsConcurrencyToken();
 
-        // 🛠️ 3. PROVIDER-SPECIFIC ROWVERSION DEFAULTS
+        // 3. PROVIDER-SPECIFIC ROWVERSION DEFAULTS
         if (Database.IsNpgsql())
         {
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
@@ -59,7 +59,7 @@ public class UniTreeDbContext : DbContext
             }
         }
 
-        // 🛠️ 4. RELATIONSHIPS
+        // 4. RELATIONSHIPS
         modelBuilder.Entity<UniTreeGroup>()
             .HasOne(g => g.CreatedBy)
             .WithMany()
@@ -78,7 +78,7 @@ public class UniTreeDbContext : DbContext
             .HasForeignKey(m => m.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // 🛠️ 5. SOFT DELETE FILTERS
+        // 5. SOFT DELETE FILTERS
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (typeof(BaseModel).IsAssignableFrom(entityType.ClrType))

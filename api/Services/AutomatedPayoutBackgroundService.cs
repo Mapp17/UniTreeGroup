@@ -28,7 +28,7 @@ public class AutomatedPayoutBackgroundService : BackgroundService
                     var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                     var transactionsService = scope.ServiceProvider.GetRequiredService<TransactionsServices>();
 
-                    // 1. Get all scheduled payouts due now
+                    // Get all scheduled payouts due now
                     var duePayouts = unitOfWork.Payouts.Find(p => p.Status == PayoutScheduleStatus.Scheduled && p.ScheduledDate <= DateTime.UtcNow).ToList();
 
                     foreach (var payout in duePayouts)
@@ -37,19 +37,19 @@ public class AutomatedPayoutBackgroundService : BackgroundService
 
                         try
                         {
-                            // 2. Execute the payout transaction
+                            // Execute the payout transaction
                             var transactionDto = new TransactionRequestDto
                             {
                                 UserId = payout.BeneficiaryUserId,
                                 Amount = payout.Amount,
                                 Reference = $"AUTO-PAYOUT-{payout.Id}-{DateTime.UtcNow.Ticks}",
                                 Description = $"Automated scheduled payout #{payout.Id}",
-                                UniTreeGroupId = 1 // Simplified: In a real app, PayoutSchedule would have a GroupId
+                                UniTreeGroupId = 1 
                             };
 
                             transactionsService.ProcessPayout(transactionDto);
 
-                            // 3. Update Payout Schedule status
+                            //Update Payout Schedule status
                             payout.Status = PayoutScheduleStatus.Completed;
                             payout.ProcessedAt = DateTime.UtcNow;
                             unitOfWork.Payouts.Update(payout);
@@ -57,7 +57,8 @@ public class AutomatedPayoutBackgroundService : BackgroundService
                         catch (Exception ex)
                         {
                             _logger.LogError(ex, $"Failed to process payout {payout.Id}");
-                            payout.Status = PayoutScheduleStatus.Skipped; // Or handle retry logic
+                            // Or handle retry logic
+                            payout.Status = PayoutScheduleStatus.Skipped; 
                             unitOfWork.Payouts.Update(payout);
                         }
                     }
@@ -70,7 +71,7 @@ public class AutomatedPayoutBackgroundService : BackgroundService
                 _logger.LogError(ex, "Error occurred while processing automated payouts.");
             }
 
-            // Run check every 1 minute (configurable)
+            // Run checks
             await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
         }
 

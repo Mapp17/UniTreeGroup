@@ -1,8 +1,4 @@
 
-/// <summary>
-/// Represents a high-level financial event (deposit, withdrawal, contribution, payout).
-/// Each Transaction produces two LedgerEntries (double-entry bookkeeping).
-/// </summary>
 public class Transactions : BaseModel
 {
     public int UserId { get; set; }
@@ -20,16 +16,12 @@ public class Transactions : BaseModel
 }
 
 
-/// <summary>
-/// Double-entry bookkeeping ledger line.
-/// Every financial event debits one account and credits another.
-/// The ledger must always balance (sum of debits == sum of credits).
-/// </summary>
+
 public class LedgerEntry : BaseModel
 {
-    public int TransactionsId { get; set; } // Changed from Guid to int to match Transactions.Id
+    public int TransactionsId { get; set; } 
     public LedgerEntryType EntryType { get; set; } // Debit or Credit
-    public string AccountName { get; set; } = string.Empty; // e.g. "UserWallet", "StokvelPool", "ExternalGateway"
+    public string AccountName { get; set; } = string.Empty; 
     public int? WalletId { get; set; }
     public int? StokvelGroupId { get; set; }
     public string Reference { get; set; } = default!;

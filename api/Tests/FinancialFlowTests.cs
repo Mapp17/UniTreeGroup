@@ -95,11 +95,11 @@ public class FinancialFlowTests : IDisposable
             .Where(l => l.Reference == "TEST-CONTRIB-001")
             .ToListAsync();
 
-        // 💰 Balance checks
+        // Balance checks
         Assert.Equal(600m, updatedWallet.Balance);
         Assert.Equal(400m, updatedGroup.PoolBalance);
 
-        // 📒 Ledger integrity
+        // Ledger integrity
         Assert.Equal(2, ledgerEntries.Count);
 
         var debit = ledgerEntries.FirstOrDefault(l => l.EntryType == LedgerEntryType.Debit);
@@ -114,7 +114,7 @@ public class FinancialFlowTests : IDisposable
         Assert.Equal(400m, credit.Amount);
         Assert.Equal("StokvelPool", credit.AccountName);
 
-        // ⚖️ Double-entry validation
+        // Double-entry validation
         var totalDebits = ledgerEntries
             .Where(l => l.EntryType == LedgerEntryType.Debit)
             .Sum(l => l.Amount);
@@ -147,9 +147,7 @@ public class FinancialFlowTests : IDisposable
         };
 
         // ACT
-        // We simulate two concurrent tasks. Note: In a real system these would be separate requests.
-        // EF Core doesn't support multiple concurrent operations on the same context instance,
-        // but since we're testing the logic, we'll run them and expect one to fail or at least
+        // Simulate two concurrent tasks.
         // the final state to be consistent.
         
         var task1 = _transactionsService.ProcessContribute(request);

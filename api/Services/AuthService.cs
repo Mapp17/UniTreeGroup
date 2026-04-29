@@ -16,7 +16,7 @@ public class AuthService
 
     public string? Login(string email, string password)
     {
-        // In a real app, you would hash the password and compare
+        
         var user = _unitOfWork.Users.GetByEmail(email);
         
         if (user == null || user.PasswordHash != password) 
