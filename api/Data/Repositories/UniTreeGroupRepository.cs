@@ -1,14 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
-public interface IUniTreeGroupRepository : IGenericRepository<UniTreeGroup>
-{
-    Task<IEnumerable<UniTreeGroup>> GetAllWithDetailsAsync();
-    Task<UniTreeGroup?> GetByIdWithDetailsAsync(int id);
-    Task<bool> IsUserInAnyGroupAsync(int userId);
-    Task<bool> AddMemberAsync(Membership membership);
-}
 
-public class UniTreeGroupRepository : GenericRepository<UniTreeGroup>, IUniTreeGroupRepository
+public class UniTreeGroupRepository : RepositoryWrapper<UniTreeGroup>, IUniTreeGroupRepository
 {
     public UniTreeGroupRepository(UniTreeDbContext context) : base(context) { }
 

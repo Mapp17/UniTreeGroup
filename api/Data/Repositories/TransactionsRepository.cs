@@ -1,14 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 
-public interface ITransactionsRepository : IGenericRepository<Transactions>
-{
-    Task<Transactions> CreateWithLedgerAsync(Transactions transaction, List<LedgerEntry> entries);
-    Transactions? GetByReference(string reference);
-    IEnumerable<Transactions> GetByUserId(int userId);
-    Transactions? GetByIdWithUser(int id);
-}
 
-public class TransactionsRepository : GenericRepository<Transactions>, ITransactionsRepository
+
+public class TransactionsRepository : RepositoryWrapper<Transactions>, ITransactionsRepository
 {
     public TransactionsRepository(UniTreeDbContext context) : base(context) { }
 

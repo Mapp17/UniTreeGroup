@@ -1,12 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 
-public interface IUserRepository : IGenericRepository<User>
-{
-    User? GetByEmail(string email);
-    User? GetByIdWithWallet(int id);
-}
 
-public class UserRepository : GenericRepository<User>, IUserRepository
+
+public class UserRepository : RepositoryWrapper<User>, IUserRepository
 {
     public UserRepository(UniTreeDbContext context) : base(context) { }
 
