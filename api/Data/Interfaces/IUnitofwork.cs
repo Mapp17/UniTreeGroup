@@ -4,5 +4,6 @@ public interface IUnitOfWork : IDisposable
     TransactionsRepository Transactions { get; }
     UniTreeGroupRepository Groups { get; }
     PayoutRepository Payouts { get; }
+    IWalletRepository Wallets { get; }
     Task<int> CompleteAsync();
 }

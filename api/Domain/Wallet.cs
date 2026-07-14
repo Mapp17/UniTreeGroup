@@ -12,4 +12,9 @@ public class Wallet : BaseModel
     [JsonIgnore]
     public User User { get; set; } = null!;
     public ICollection<Transactions> Transactions { get; set; } = new List<Transactions>();
+
+    public static implicit operator Wallet(WalletRepository v)
+    {
+        throw new NotImplementedException();
+    }
 }

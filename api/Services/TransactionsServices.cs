@@ -3,12 +3,10 @@ using Microsoft.EntityFrameworkCore;
 public class TransactionsServices
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly UniTreeDbContext _context;
 
-    public TransactionsServices(IUnitOfWork unitOfWork, UniTreeDbContext context)
+    public TransactionsServices(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _context = context;
     }
 
     public async Task<TransactionReadDto> ProcessDeposit(TransactionRequestDto dto)
@@ -33,9 +31,7 @@ public class TransactionsServices
             throw new ConflictException("A transaction with this reference already exists.");
 
         // RELOAD wallet to ensure we have the latest balance and RowVersion
-        var wallet = await _context.Wallets
-            .FirstOrDefaultAsync(w => w.UserId == dto.UserId);
-        
+        var wallet = await _unitOfWork.Wallets.GetByUserIdAsync(dto.UserId);
         if (wallet == null) throw new NotFoundException($"Wallet for user {dto.UserId} not found.");
 
         var user = _unitOfWork.Users.GetByIdWithWallet(dto.UserId);

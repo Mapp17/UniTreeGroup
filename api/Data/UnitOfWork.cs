@@ -11,12 +11,15 @@ public class UnitOfWork : IUnitOfWork
         Transactions = new TransactionsRepository(_context);
         Groups = new UniTreeGroupRepository(_context);
         Payouts = new PayoutRepository(_context);
+        Wallets = new WalletRepository(_context);
     }
 
     public UserRepository Users { get; private set; }
     public TransactionsRepository Transactions { get; private set; }
     public UniTreeGroupRepository Groups { get; private set; }
     public PayoutRepository Payouts { get; private set; }
+
+    public IWalletRepository Wallets { get; private set; }
 
     public async Task<int> CompleteAsync()
     {
