@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [Route("api/[controller]")]
@@ -22,7 +23,7 @@ public class AuthController : ControllerBase
         return Ok(new { Token = token });
     }
 }
-
+[Authorize]
 public class LoginDto
 {
     public string Email { get; set; } = string.Empty;

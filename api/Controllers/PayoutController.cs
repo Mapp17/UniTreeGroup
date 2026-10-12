@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers
@@ -12,13 +13,14 @@ namespace api.Controllers
         {
             _payoutServices = payoutServices;
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost("schedule")]
         public async Task<IActionResult> Schedule([FromBody] CreatePayoutDto dto)
         {
             var result = await _payoutServices.SchedulePayoutAsync(dto);
             return Ok(result);
         }
+        [Authorize(Roles = "Admin")]
 
         [HttpGet("group/{id}")]
         public async Task<IActionResult> GetGroup(int id)

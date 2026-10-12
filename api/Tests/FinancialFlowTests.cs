@@ -63,7 +63,7 @@ public class FinancialFlowTests : IDisposable
             UniTreeGroupId = 10 
         };
 
-        _context.Users.Add(user);
+        _context.UniTreeUsers.Add(user);
         _context.Wallets.Add(wallet);
         _context.UniTreeGroups.Add(group);
         _context.Memberships.Add(membership);

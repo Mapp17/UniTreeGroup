@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-public class UniTreeDbContext : DbContext
+public class UniTreeDbContext : IdentityDbContext<ApplicationUser>
 {
     public UniTreeDbContext(DbContextOptions<UniTreeDbContext> options) : base(options) {}
 
-    public DbSet<User> Users { get; set; } = null!;
+    public DbSet<User> UniTreeUsers { get; set; } = null!;
     public DbSet<Membership> Memberships { get; set; } = null!;
     public DbSet<Wallet> Wallets { get; set; } = null!;
     public DbSet<Transactions> Transactions { get; set; } = null!;
@@ -15,6 +16,7 @@ public class UniTreeDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         // 1. ENABLE POSTGRES EXTENSIONS
         // This allows Postgres to use the 'gen_random_bytes' function
         modelBuilder.HasPostgresExtension("pgcrypto");
@@ -123,3 +125,4 @@ public class UniTreeDbContext : DbContext
         }
     }
 }
+

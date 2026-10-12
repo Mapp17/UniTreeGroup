@@ -4,9 +4,9 @@ public static class AppSeeder
 {
     public static async Task SeedAsync(UniTreeDbContext context)
     {
-        if (!context.Users.Any())
+        if (!await context.UniTreeUsers.AnyAsync())
         {
-            context.Users.AddRange(
+            context.UniTreeUsers.AddRange(
                 new User { Id = 1, FullName = "Thabo Mokoena", Email = "thabo.mokoena@gmail.com", PhoneNumber = "0823456789", PasswordHash = "hashed_pw_1" },
                 new User { Id = 2, FullName = "Lerato Nkosi", Email = "lerato.nkosi@gmail.com", PhoneNumber = "0734567890", PasswordHash = "hashed_pw_2" },
                 new User { Id = 3, FullName = "Sipho Dlamini", Email = "sipho.dlamini@gmail.com", PhoneNumber = "0712345678", PasswordHash = "hashed_pw_3" },
@@ -18,7 +18,7 @@ public static class AppSeeder
             await context.Database.ExecuteSqlRawAsync("SELECT setval(pg_get_serial_sequence('\"Users\"', 'Id'), (SELECT MAX(\"Id\") FROM \"Users\"));");
         }
 
-        if (!context.UniTreeGroups.Any())
+        if (!await context.UniTreeGroups.AnyAsync())
         {
             context.UniTreeGroups.AddRange(
                 new UniTreeGroup { Id = 1, Name = "Soweto Savings Circle", Description = "Monthly savings", CreatedById = 1, ContributionAmount = 500m, PayoutCycle = PayoutCycleType.Monthly, MaxMembers = 10 },
@@ -28,7 +28,7 @@ public static class AppSeeder
             await context.Database.ExecuteSqlRawAsync("SELECT setval(pg_get_serial_sequence('\"UniTreeGroups\"', 'Id'), (SELECT MAX(\"Id\") FROM \"UniTreeGroups\"));");
         }
 
-        if (!context.Memberships.Any())
+        if (!await context.Memberships.AnyAsync())
         {
             context.Memberships.AddRange(
                 new Membership { Id = 1, UserId = 1, UniTreeGroupId = 1, PayoutOrder = 1 },

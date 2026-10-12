@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,8 +71,30 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddDbContext<UniTreeDbContext>(options =>
  options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+.AddEntityFrameworkStores<UniTreeDbContext>().AddDefaultTokenProviders();
+
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    
+    var context = services.GetRequiredService<UniTreeDbContext>();
+    
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    
+    await AppSeeder.SeedAsync(context);
+    await IdentitySeedData.SeedIdentityAsync(userManager, roleManager);
+}
+
+app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 
 // EXCEPTION HANDLING FIRST
 app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -80,19 +103,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<UniTreeDbContext>();
-    await AppSeeder.SeedAsync(context);
 }
 
 app.Run();

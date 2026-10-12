@@ -119,7 +119,7 @@ public class TransactionsServices
 
     private static TransactionReadDto MapToDto(Transactions t) => new TransactionReadDto
     {
-        Id = t.Id,
+        TransactionId = t.Id,
         UserId = t.UserId,
         Type = t.Type.ToString(),
         Status = t.Status.ToString(),
